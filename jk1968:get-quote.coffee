@@ -1,13 +1,15 @@
 if Meteor.isServer
+  #
   Meteor.methods
-    getQuote: (stock) ->
+    # stockIds 可以接受一組代碼，例如 '1000001, 0600000'，其中深1滬0
+    # 獲取實時行情
+    getQuotes: (stockIds) ->
       this.unblock()
 
-      url = "http://api.money.126.net/data/feed/#{stock}"
+      url = "http://api.money.126.net/data/feed/#{stockIds}"
 
       options =
-        timeout: 30000000
-
+        timeout: 3000000
 
       try
         res = HTTP.get url, options
@@ -15,11 +17,9 @@ if Meteor.isServer
         obj = eval res.content
         # here we can manipulate the obj
         # q = (quotes for id, quotes of obj)
-        # console.log obj[stock.split(',')[0]]
+        # console.log obj[stockIds.split(',')[0]]
         return obj
-
       catch error
         console.log error
-
       finally
         -> # Only do cleanUp and should not return anything here
