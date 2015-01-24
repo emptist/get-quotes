@@ -13,9 +13,10 @@ if Meteor.isServer
         res = HTTP.get url, options
         _ntes_quote_callback = (args) -> args
         obj = eval res.content
-        q = (quotes for id, quotes of obj)
-        console.log obj[stock.split(',')[0]]
-        return q[0]
+        # here we can manipulate the obj
+        # q = (quotes for id, quotes of obj)
+        # console.log obj[stock.split(',')[0]]
+        return obj
 
       catch error
         console.log error
