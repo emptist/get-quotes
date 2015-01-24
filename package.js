@@ -12,7 +12,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
-  api.use(['coffeescript', 'http'])
+  api.use(['coffeescript', 'http', 'mquandalle:jade'])
   api.addFiles('jk1968:get-quote.coffee');
 });
 
