@@ -1,0 +1,784 @@
+Purbayu’s Weblog
+Think and write!
+
+CSV parser using javascript
+
+The following is javascript code which is used to read CSV file. I wrote the code starting from opening CSV file, loading to memory, parsing (into lines and then into fields), and finally displaying as a table.
+
+You can modify it whatever you like. But remember, don’t forget to put my credit :)
+
+<html>
+<head>
+<title>- CSV parser -</title>
+</head>
+<body>
+
+<form>
+
+<input type="file" name="F1" id="F1" size="80">
+
+<input type="button" value="Read" name="B1" id="B1" onclick="execFile()">
+ <input type="reset" value="Reset" name="B2" id="B2" onclick="renderArea.innerHTML=''">
+</form>
+<div id="renderArea"></div>
+<script>
+// -- CSV PARSER --
+// author  : Purbayu, 30Sep2008
+// email   : purbayubudi@gmail.com
+//
+// description :
+//  This jscript code describes how to load csv file and parse it into fields.
+//  Additionally, a function to display html table as result is added.
+//
+// disclamer:
+//  To use this code freely, you must put author's name in it.
+
+var renderArea=document.getElementById("renderArea");
+
+function execFile() {
+// main function to open, parse, and then render
+ var myfile=document.getElementById("F1");
+
+ // verify file extension (csv or not)
+ if (myfile.value.match(/\.csv$/gi)==".csv") {
+ // create progress window..
+ var progressWindow = window.open("","","top=10,left=10,height=100,width=200");
+ progressWindow.document.write("<html><head></head><body>
+<div id='progressArea'></div>
+</body></html>");
+ var progressArea = progressWindow.document.getElementById("progressArea");
+
+ // load csv file and split it line by line
+ var arr = readCSV(myfile.value);
+
+ // parse csv line by line
+ for (var i=0;i<arr.length;i++) {
+ arr[i] = parseLineCSV(arr[i]);
+ progressArea.innerHTML="Parsing: "+(i+1)+" of "+arr.length;
+ }
+
+ // render the result into html table
+ s='
+<table border=1>';
+ for (var i=0;i<arr.length;i++) {
+ s=s+'
+<tr>';
+ for (var j=0;j<arr[i].length;j++) {
+ s=s+'
+<td><font size="1" face="Verdana">'+arr[i][j]+'</font></td>
+';
+ }
+ progressArea.innerHTML="Table rendering: "+(i+1)+" of "+arr.length;
+ s=s+'</tr>
+';
+ }
+ s=s+'</table>
+';
+
+ // close progress window after all tasks are completed
+ progressWindow.close();
+ } else {
+ // show this if user tries to open non csv file
+ s='<b><font size="1" face="Verdana" color="#FF0000">Not a CSV file!</font></b>';
+ }
+
+ renderArea.innerHTML=s;
+}
+
+//The following code is depicted from Professional Javascript for
+// Web Developers, a book by Nicholas C.Zakas
+if (typeof XMLHttpRequest == "undefined" && window.ActiveXObject) {
+ function XMLHttpRequest() {
+ var arrSignatures = ["MSXML2.XMLHTTP.5.0", "MSXML2.XMLHTTP.4.0",
+ "MSXML2.XMLHTTP.3.0", "MSXML2.XMLHTTP",
+ "Microsoft.XMLHTTP"];
+ for (var i=0; i < arrSignatures.length; i++) {
+ try {
+ var oRequest = new ActiveXObject(arrSignatures[i]);
+ return oRequest;
+ } catch (oError) {
+ //ignore
+ }
+ }
+ throw new Error("MSXML is not installed on your system.");
+ }
+}
+
+function readCSV(locfile) {
+// load a whole csv file, and then split it line by line
+ var req = new XMLHttpRequest();
+ req.open("POST",locfile,false);
+ req.send("");
+ return req.responseText.split(/\n/g);
+}
+
+function parseLineCSV(lineCSV) {
+// parse csv line by line into array
+ var CSV = new Array();
+
+ // Insert space before character ",". This is to anticipate 'split' in IE
+ // try this:
+ //
+ // var a=",,,a,,b,,c,,,,d";
+ // a=a.split(/\,/g);
+ // document.write(a.length);
+ //
+ // You will see unexpected result!
+ //
+ lineCSV = lineCSV.replace(/,/g," ,");
+
+ lineCSV = lineCSV.split(/,/g);
+
+ // This is continuing of 'split' issue in IE
+ // remove all trailing space in each field
+ for (var i=0;i
+	<lineCSV.length;i++) {
+ lineCSV[i] = lineCSV[i].replace(/\s*$/g,"");
+ }
+
+ lineCSV[lineCSV.length-1]=lineCSV[lineCSV.length-1].replace(/^\s*|\s*$/g,"");
+ var fstart = -1;
+
+ for (var i=0;i<lineCSV.length;i++) {
+ if (lineCSV[i].match(/"$/)) {
+ if (fstart>=0) {
+ for (var j=fstart+1;j<=i;j++) {
+ lineCSV[fstart]=lineCSV[fstart]+","+lineCSV[j];
+ lineCSV[j]="-DELETED-";
+ }
+ fstart=-1;
+ }
+ }
+ fstart = (lineCSV[i].match(/^"/)) ? i : fstart;
+ }
+
+ var j=0;
+
+ for (var i=0;i
+	<lineCSV.length;i++) {
+ if (lineCSV[i]!="-DELETED-") {
+ CSV[j] = lineCSV[i];
+ CSV[j] = CSV[j].replace(/^\s*|\s*$/g,"");     // remove leading & trailing space
+ CSV[j] = CSV[j].replace(/^"|"$/g,"");         // remove " on the beginning and end
+ CSV[j] = CSV[j].replace(/""/g,'"');           // replace "" with "
+ j++;
+ }
+ }
+
+ return CSV;
+}
+
+</script>
+
+</body>
+</html>
+About these ads
+Like this:
+
+Like Loading...
+Related
+
+49 Responses to “CSV parser using javascript”
+
+
+Nice script. It savved me some time on creating one myself.
+
+I’ve modified parseLineCSV() because parsing did not happen as expected for lines like :
+“nom, surmane and name, surname”, “514-514-5145″, “Montreal, Canada”
+
+Here is the modification :
+
+function parseLineCSV(lineCSV) {
+// parse csv line by line into array
+var CSV = new Array();
+
+// Insert space before character “,”. This is to anticipate ‘split’ in IE
+// try this:
+//
+// var a=”,,,a,,b,,c,,,,d”;
+// a=a.split(/\,/g);
+// document.write(a.length);
+//
+// You will see unexpected result!
+//
+lineCSV = lineCSV.replace(/,/g,” , “);
+
+lineCSV = lineCSV.split(/,/g);
+
+// This is continuing of ‘split’ issue in IE
+// remove all trailing space in each field
+for (var i=0;i<lineCSV.length;i++) {
+lineCSV[i] = lineCSV[i].replace(/\s*$/g,””);
+}
+
+lineCSV[lineCSV.length-1]=lineCSV[lineCSV.length-1].replace(/^\s*|\s*$/g,””);
+
+var fstart = -1;
+//MODIFICATION START
+var quotedStr = false;
+var endQuotedStr = false;
+
+for (var i=0;i<lineCSV.length;i++) {
+//if we start a quoted string
+if(!quotedStr && lineCSV[i].match(/^\s*”/))
+{
+quotedStr = true;
+fstart = i;
+}
+//if we are going out of a quoted string
+if(quotedStr && lineCSV[i].match(/”\s*$/))
+{
+endQuotedStr = true;
+}
+//if this piece of string is inside the quoted string and it is not the first part
+// do concatenation
+if (quotedStr && fstart < i){
+lineCSV[fstart]=lineCSV[fstart]+”,”+lineCSV[i];
+lineCSV[i]=”-DELETED-“;
+}
+//we are out of this quoted string, resets default values
+if(endQuotedStr)
+{
+quotedStr = false;
+endQuotedStr = false;
+fstart = -1;
+}
+}
+//MODIFICATION END
+
+var j=0;
+for (var i=0;i<lineCSV.length;i++) {
+if (lineCSV[i]!=”-DELETED-“) {
+CSV[j] = lineCSV[i];
+CSV[j] = CSV[j].replace(/^\s*|\s*$/g,””); // remove leading & trailing space
+CSV[j] = CSV[j].replace(/^”|”$/g,””); // remove ” on the beginning and end
+CSV[j] = CSV[j].replace(/””/g,'”‘); // replace “” with ”
+j++;
+}
+}
+
+return CSV;
+}
+
+igor  -  December 1, 2008 at 7:21 pm | Reply
+
+Reply
+
+Hi,
+
+I tried your script. It doesn’t work on IE as well as Mozilla.
+Could you please have a look and let me know the changes required?
+
+thanks
+Girish
+
+Girish  -  January 8, 2009 at 5:19 am | Reply
+
+Reply
+
+Could you tell me what error that you received (both IE and Mozilla)?
+
+purbayubudi  -  January 15, 2009 at 1:06 pm | Reply
+
+Reply
+
+I suppose Girish was getting error due to bad characters like the single and double quotes.
+I got this one and substituted them inside the code.
+I mean ” with ” and ’ with ‘.
+
+After this change it works perfectly in both IE and Mozilla.
+
+Br,
+Lorens
+
+Lorens  -  February 2, 2009 at 7:52 am | Reply
+
+Reply
+
+Ok, sorry, posting my comment the single and double quotes are “transleted”, so they don’t appear as they are written by me.
+
+Btw, I think the issue is clear. Substituting the quotes the code works properly.
+
+Bye,
+Lorens
+
+Lorens  -  February 2, 2009 at 7:54 am | Reply
+
+Reply
+
+hey,
+I tried using the script. But it is not working.
+When I click on read, IE doesn’t do anything. The status bar displays “Error on Page”
+
+Krishna  -  June 29, 2009 at 6:11 pm | Reply
+
+Reply
+
+i want the string to be separarted based on ‘||’ rather than ‘,’
+can anyone give their suggestions
+
+Chirag  -  July 4, 2009 at 4:09 am | Reply
+
+Reply
+
+This script is not working on Google chrome and safari. please let me know the changes required?
+
+Thanks
+
+Digvijay  -  August 3, 2009 at 5:16 am | Reply
+
+Reply
+
+REMOVE lines 79 to 96 as it is not needed by any of the browsers.
+
+HTMLGuy  -  August 13, 2009 at 12:11 am | Reply
+
+Reply
+
+makes the access denied error due to security. It either needs a cross-domain policy or just run the csv in the same domain.
+
+HTMLGuy  -  August 13, 2009 at 12:13 am | Reply
+
+Reply
+
+Hi, nice code but it doesn’t work to me. I always get 404 error – there is no file entered to file input field.
+instead of:
+var arr = readCSV(myfile.value);
+I have written:
+var arr = myfile.files.item(0).getAsBinary();
+Don’t need Ajax etc.
+
+mark  -  August 24, 2009 at 11:34 am | Reply
+
+Reply
+
+Hi,
+
+Thank you for taking the time and care to post your javascript solution on the web! When I use the code with Firefox, nothing happens, with IE8 I get a string of errors. I am not a javascript expert, is there something I need to do apart from cutting and pasting the code into an html document? Best, Jon.
+
+Jon  -  September 10, 2009 at 4:54 pm | Reply
+
+Reply
+
+She has become the new voice of the crazy republicans. ,
+
+Coder52  -  October 10, 2009 at 6:42 pm | Reply
+
+Reply
+
+Hi!
+
+The code worked for me out of the box.
+Simple but excellent.
+I used to use firefox on ubuntu and it worked without error on the first try.
+
+Thank!
+
+kvark  -  November 1, 2009 at 5:04 pm | Reply
+
+Reply
+
+Mas Purbayu, script nya koq gak jalan di IE dan Modzilla saya yah. bisa tolongin gak. Ini error ny
+
+Tosa D Wisnu  -  December 21, 2009 at 5:03 pm | Reply
+
+Reply
+
+Mas Purbayu, script nya koq gak jalan di IE dan Modzilla saya yah. bisa tolongin gak. Ini error nya
+
+Webpage error details
+
+User Agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; SLCC1; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729)
+Timestamp: Mon, 21 Dec 2009 17:02:52 UTC
+
+Message: Unterminated string constant
+Line: 37
+Char: 58
+Code: 0
+URI: file:///C:/Users/Administrator/Desktop/Edit1.HTML
+
+Tosa D Wisnu  -  December 21, 2009 at 5:03 pm | Reply
+
+Reply
+
+Coba mulai dari line 37 dibuat satu baris, jangan ada ‘white space':
+[progressWindow.document.write(“”);] script ini dibuat satu baris.
+
+Kalau ada error 404/file not found coba file csv yg akan di parsing di simpan satu directory/satu folder dengan file yg berisi script pada postingan ini.
+
+irfanf1  -  October 18, 2010 at 3:04 pm | Reply
+
+Reply
+
+|progress Window . docum ent.wr ite(“”);| dibuat satu baris (make in 1 line,no white space).
+
+juga kalau ada seperti; | s=s+”; | dibuat satu baris .
+
+irfanf1  -  October 18, 2010 at 3:18 pm | Reply
+
+Reply
+
+A few mods needed but worked great thanks to all :)
+
+AaronC  -  November 22, 2010 at 9:34 pm | Reply
+
+Reply
+
+Your code runs perfectly in IE8 but not in Mozilla Firefox.This is because ActiveXObject is not supported in Firefox.Do you have any workaround to run in Firefox too?Thanks.
+
+hamka  -  April 9, 2011 at 2:15 am | Reply
+
+Reply
+
+very nice article i liked it , you save a lot of time
+
+Eng. Ra'ad AL-Momani  -  October 19, 2011 at 5:18 pm | Reply
+
+Reply
+oxyhives prescribed by doctor?…
+
+[…]CSV parser using javascript « Purbayu’s Weblog[…]…
+
+oxyhives prescribed by doctor?  -  November 15, 2011 at 9:17 am | Reply
+
+Reply
+tenoners…
+
+[…]CSV parser using javascript « Purbayu’s Weblog[…]…
+
+tenoners  -  November 26, 2011 at 9:11 am | Reply
+
+Reply
+
+Ummm… worked. Thanks!
+
+Aaron Frost  -  November 29, 2011 at 7:13 am | Reply
+
+Reply
+
+I am using this to crunch some numbers… not for anything in production. So, I will be using it in Chrome… and it works. I didn’t use the entire thing. I am just using the parseLineCSV function. But, it works like gravy with the suggested changes. I love it! Thanks for putting this together. I don’t quite understand the string parsing theory that you are using, nor do i completely understand the regex. However, it is working and doing exactly what I need it to do. Thanks!
+
+Aaron Frost  -  November 29, 2011 at 7:19 am | Reply
+
+Reply
+material safety data sheet…
+
+[…]CSV parser using javascript « Purbayu’s Weblog[…]…
+
+material safety data sheet  -  January 17, 2012 at 9:48 am | Reply
+
+Reply
+[cluster headache|headache relief|headache sufferers|migraine cures|migraine headaches|migraine symptoms|natural headache remedies|naturopathic approach|pharmacy times]…
+
+[…]CSV parser using javascript « Purbayu’s Weblog[…]…
+
+[cluster headache|headache relief|headache sufferers|migraine cures|migraine headaches|migraine symptoms|natural headache remedies|naturopathic approach|pharmacy times]  -  January 24, 2012 at 12:50 pm | Reply
+
+Reply
+
+Code is not working. can any one tell me what’s wrong?
+
+Bappy  -  January 29, 2012 at 8:45 am | Reply
+
+Reply
+[…] CSV parser using javascript « Purbayu’s Weblog – February 9th ( tags: csv javascript viewer example webapp ) […]
+
+Delicious Bookmarks for February 9th from 11:05 to 17:57 « Lâmôlabs  -  February 9, 2012 at 11:00 pm | Reply
+
+Reply
+[…] zum Parsen einer externen csv Datei Ich weis ja nicht nach was du gegoogelt hast: CSV parser using javascript/ stackoverflow…Parse and Access remote CSV with Javascript only? stackoverflow…Javascript code […]
+
+Beste Vorgehensweise zum Parsen einer externen csv Datei  -  March 3, 2012 at 12:24 pm | Reply
+
+Reply
+
+Hi this is not working when i hosted the html page…. due to cross domain ajax issue…
+
+pandu  -  March 6, 2012 at 7:40 am | Reply
+
+Reply
+
+I started of with your script and Igor’s fix, thanks! However, I needed more advanced quoting so I wrote my own thing that duplicates the behavior of ruby’s standard csv parser as far as my test cases go (I use this in the html version of csv2vcard I’m writing):
+
+function parseCsv(txt) {
+var ret = [];
+var value = “”;
+var line = [];
+var mode = “std”;
+for(var i = 0; i < txt.length; i++) {
+switch(mode) {
+case "std":
+switch(txt[i]) {
+case "'":
+case '"':
+mode = txt[i];
+continue;
+case ",":
+line.push(value);
+value = "";
+continue;
+case "\n":
+case "\r":
+line.push(value);
+value = "";
+ret.push(line);
+line = [];
+continue;
+default:
+value += txt[i];
+continue;
+}
+case "'":
+case '"':
+if(txt[i] == mode) {
+if(txt[i + 1] == txt[i]) {
+value += txt[i];
+i += 1;
+continue;
+}
+mode = "std";
+continue;
+}
+value += txt[i];
+}
+}
+if(i) {
+line.push(value);
+ret.push(line);
+}
+return ret;
+}
+
+Schrotie  -  March 27, 2012 at 9:42 pm | Reply
+
+Reply
+
+Hi there
+it is not working in the newest Chrome nor IE9
+
+CSV:
+a,b,c,d
+1,2,3,4
+5,6,7,8
+
+here’s error from IE:
+
+Message: Unterminated string constant
+Line: 37
+Char: 58
+Code: 0
+URI: file:///c://parseCsv_JS.html
+
+Message: Object expected
+Line: 11
+Char: 1
+Code: 0
+URI: file:///c://parseCsv_JS.html
+
+Message: Object expected
+Line: 11
+Char: 1
+Code: 0
+URI: file:///c://parseCsv_JS.html
+
+Message: Object expected
+Line: 11
+Char: 1
+Code: 0
+URI: file:///c://parseCsv_JS.html
+
+Message: Object expected
+Line: 11
+Char: 1
+Code: 0
+URI: file:///c://parseCsv_JS.html
+
+frito  -  April 7, 2012 at 5:22 pm | Reply
+
+Reply
+gamekeys…
+
+[…]CSV parser using javascript « Purbayu’s Weblog[…]…
+
+gamekeys  -  April 15, 2012 at 11:44 am | Reply
+
+Reply
+
+If you want something a little more battle-hardened, I have created a jquery plugin that is specifically designed to address all things related to parsing CSV to javascript in the browser.
+
+jquery-csv:
+
+http://code.google.com/p/jquery-csv/
+
+evanplaice  -  April 24, 2012 at 4:30 am | Reply
+
+Reply
+
+can any one tell me how to write the value into the csv file using php…………. it is urgent
+
+sivaraj  -  September 5, 2012 at 9:49 am | Reply
+
+Reply
+
+Hi there it’s me, I am also visiting this web page daily, this site is genuinely nice and the users are genuinely sharing pleasant thoughts.
+
+coupons februar 12  -  November 15, 2012 at 9:14 pm | Reply
+
+Reply
+
+i need one javascript program . When i click html button convert from two dimension array save into csv(Excel).I need it urgently.send full code.Advance thanks.
+
+rakesh  -  November 17, 2012 at 3:40 pm | Reply
+
+Reply
+
+Reblogged this on Yanbingms's Blog and commented:
+CSV parser using javascript
+
+yanbing  -  December 25, 2012 at 1:05 pm | Reply
+
+Reply
+
+The script looks wonderful, but I was not able to get a simple csv file loaded locally, on my PC. I tried Chrome, Firefox, IE. Does this work only on a server? Thank you.
+
+Yuriy  -  December 27, 2012 at 3:06 am | Reply
+
+Reply
+
+Greatings
+i have a project for ftp host without sql or php server
+so my alternative is for js and other type of database
+well, my idea is to build a json or jquery engine that execute a database texto zipped
+
+ex
+[database.zip]
+-table1.csv
+-table2.csv
+-table3.csv
+-table4.csv
+
+query like sql
+the javascript read content of zip file
+query tables (only for read)
+presents the result
+passw zip file in md5
+
+i think this is possible but need some help
+
+cjjesus  -  February 9, 2013 at 3:25 pm | Reply
+
+Reply
+
+Hello, I would like to know who has the csv format to make this code work.
+thanks
+
+pinkando  -  May 22, 2013 at 11:18 am | Reply
+
+Reply
+
+nice
+
+mohan kumar.r  -  August 17, 2013 at 8:48 am | Reply
+
+Reply
+
+How can i parse csv in javascript & post its value to web API
+
+ruhi  -  March 1, 2014 at 6:17 pm | Reply
+
+Reply
+
+the code which u have provided…in that xmlHttpReader.open is not working ….the file which we’re uploading is local file.I tried too many scenarios…..and the same code which u have provided i pasted the same to test whether it is working or not…result is same it’s not working
+
+Jai  -  March 20, 2014 at 10:33 am | Reply
+
+Reply
+
+My brother suggested I might like this web site.
+
+He used to be totally right. This submit truly made my day.
+
+You can not imagine just how so much time I had spent for this information! Thank you!
+
+cheap website hosting reviews  -  July 11, 2014 at 9:49 pm | Reply
+
+Reply
+
+Prognosis Although menopause is a difficult period for some,
+most women will experience menopause without long-term problems.
+Since cessation of the menstrual stage has something to do with hormones and hormones have connections with the food we eat, the end should justify the
+means. Cigarette smoking does not only result in hot flashes however it may also result
+in other really serious medical conditions for example stroke, heart attack and.
+
+menopause nutrition  -  July 18, 2014 at 7:53 am | Reply
+
+Reply
+[…] CSV parser using javascript | Purbayu’s Weblog – Nov 09, 2008 · The following is javascript code which is used to read CSV file. I wrote the code starting from opening CSV file, loading to memory, parsing (into lines …… […]
+
+Fix Imatch Error Windows XP, Vista, 7, 8 [Solved]  -  November 19, 2014 at 2:35 pm | Reply
+
+Reply
+
+You post very interesting articles here. Your website deserves
+much more traffic. It can go viral if you give it initial boost,
+i know useful tool that can help you, just type in google: svetsern traffic tips
+
+Josephine  -  January 2, 2015 at 4:26 am | Reply
+
+Reply
+
+Leave a Reply
+
+Enter your comment here...
+
+Fill in your details below or click an icon to log in:
+
+
+ Gravatar
+Email (required) (Address never made public)
+
+Name (required)
+
+Website
+
+WordPress.com Logo
+You are commenting using your WordPress.com account. ( Log Out / Change )
+
+Twitter picture
+You are commenting using your Twitter account. ( Log Out / Change )
+
+Facebook photo
+You are commenting using your Facebook account. ( Log Out / Change )
+
+Google+ photo
+You are commenting using your Google+ account. ( Log Out / Change )
+
+Cancel
+Connecting to %s
+
+ Notify me of new comments via email.
+
+
+
+Home
+
+This entry was posted on November 9, 2008 at 2:48 pm and filed under programming. You can follow any responses to this entry through the RSS feed.
+
+Tags: csv, javascript, parser
+
+You can leave a response, or trackback from your own site.
+About filtering Sharepoint List’s view by user group and user »
+« Akhirnya Amrozi, Imam Samudra, dan Muklas di eksekusi (kaitannya dengan ‘syuhada’ dan ‘kafir’)
+Create a free website or blog at WordPress.com. The Sunburn Theme.
+
+Follow
+Follow “Purbayu's Weblog”
+
+Get every new post delivered to your Inbox.
+
+
+
+
+
+Build a website with WordPress.com
+%d bloggers like this:
