@@ -3,6 +3,5 @@ http@1.0.10
 jk1968:get-quote@0.0.1
 local-test:jk1968:get-quote@0.0.1
 meteor@1.1.4
-mquandalle:jade@0.1.0
 underscore@1.0.2
 url@1.0.3
