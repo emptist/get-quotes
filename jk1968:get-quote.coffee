@@ -23,7 +23,12 @@ if Meteor.isClient
         ###
 
       when '163.com'
-        url = 'http://quotes.money.163.com/service/chddata.html?code=0600000&start=19991110&end=20141231&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
+        host = 'http://quotes.money.163.com/service/chddata.html?code='
+        fields1 = 'TCLOSE'
+        fields2 =';HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;'
+        fields3 = 'TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
+        fields = fields1 + fields2 + field3
+        url = host + "#{ids[0]}&start=#{start}&end=#{end}&fields=#{fields}"
         callMethod url, (res)->
           res
 
