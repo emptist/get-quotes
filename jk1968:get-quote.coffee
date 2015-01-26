@@ -3,40 +3,29 @@
 if Meteor.isClient
   # use callback to return data to calling function
   GetData.quotes = (param, callback) ->
-
-    callMethod = (url, func) ->
+    rawData = (url, func) ->
       Meteor.call 'rawData', {url: url} , (err, res)->
         unless err?
-          callback func res.content
+          callback func res.content.toString 'utf8'
 
     switch param.source
       when '126.net'
         url = "http://api.money.126.net/data/feed/#{param.ids}"
         _ntes_quote_callback = (args) -> args
 
-        callMethod url, (res)->
-          eval res
-        ###
-        Meteor.call 'rawData', {url: url} , (err, res)->
-          unless err?
-            callback eval res.content
-        ###
+        rawData url, (cnt)-> eval cnt
 
       when '163.com'
         host = 'http://quotes.money.163.com/service/chddata.html?code='
-        fields1 = 'TCLOSE'
-        fields2 =';HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;'
-        fields3 = 'TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
-        fields = fields1 + fields2 + field3
-        url = host + "#{ids[0]}&start=#{start}&end=#{end}&fields=#{fields}"
-        callMethod url, (res)->
-          res
+        csvjson = GetData.csvjson
+        # 日期，代碼，名稱，收盤，最高，最低，開盤，前收，漲跌，幅度，換手率，成交量，成交金額，總市值，流通市值
+        fields = 'TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
+        headers = 'DATE;CODE;NAME;' + fields
+        id = (param.ids.split ',')[0]
+        url = host + "#{id}&start=#{param.start}&end=#{param.end}&fields=#{fields}"
 
-        ###
-        Meteor.call 'rawData', {url: url} , (err, res)->
-          unless err?
-            callback res.content
-        ###
+        rawData url, (cnt) ->
+          GetData.csv2json cnt, {delim: ',', textdelim:'\r', headers: headers.split(';')}
 
       else
         return
@@ -49,7 +38,6 @@ if Meteor.isServer
       this.unblock()
       url = param.url
       options = {timeout: 3000000}
-      #console.log HTTP.get(url, options)
 
       try
         return HTTP.get(url, options)
