@@ -1,6 +1,6 @@
 Package.describe({
   name: 'jk1968:get-quote',
-  version: '0.0.1',
+  version: '0.0.2',
   // Brief, one-line summary of the package.
   summary: 'Meteor method for getting quotes from api.money.126.net',
   // URL to the Git repository containing the source code for this package.

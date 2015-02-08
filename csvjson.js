@@ -59,7 +59,7 @@ var csvjson = GetData;
 		}
 
 		var ret = {};
-		csvheaders = args.headers; // I added this to overcome Chinese fonts
+		csvheaders = args.headers; // 這行是我加的 to overcome Chinese fonts
 		ret.headers = csvheaders;
 		ret.rows = [];
 

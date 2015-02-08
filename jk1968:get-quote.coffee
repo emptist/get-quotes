@@ -6,7 +6,7 @@ if Meteor.isClient
     rawData = (url, func) ->
       Meteor.call 'rawData', {url: url} , (err, res)->
         unless err?
-          callback func res.content.toString 'utf8'
+          callback func res.content#.toString 'utf8'
 
     switch param.source
       when '126.net'
@@ -25,7 +25,7 @@ if Meteor.isClient
         url = host + "#{id}&start=#{param.start}&end=#{param.end}&fields=#{fields}"
 
         rawData url, (cnt) ->
-          GetData.csv2json cnt, {delim: ',', textdelim:'\r', headers: headers.split(';')}
+          GetData.csv2json (cnt), {delim: ',', textdelim:'\r', headers: headers.split(';')}
 
       else
         return
