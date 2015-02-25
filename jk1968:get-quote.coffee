@@ -17,21 +17,21 @@ if Meteor.isClient
       when '163.com'
         host = 'http://quotes.money.163.com/service/chddata.html?code='
         # 日期，代碼，名稱，收盤，最高，最低，開盤，前收，漲跌，幅度，換手率，成交量，成交金額，總市值，流通市值
-        fields = 'TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
+        fields = 'TOPEN;HIGH;LOW;TCLOSE;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
         headers = 'DATE;CODE;NAME;' + fields
         id = (param.ids.split ',')[0]
         url = host + "#{id}&start=#{param.start}&end=#{param.end}&fields=#{fields}"
 
         rawData url, (cnt) ->
           csvlines = cnt.split "\n"
-          csvrows = csvlines.slice 1, csvlines.length
+          csvrows = (csvlines.slice 1, csvlines.length).reverse()
           GetData.rows = rows =  []
           for r in csvrows
-            break if r.length is 0
-            row = r.split ','
-            date = [(new Date row[0]).getTime()]
-            res = row.map(Number)
-            rows.push date.concat res[3..6], res[10..11]
+            unless r.length is 0
+              row = r.split ','
+              date = [(new Date row[0]).getTime()]
+              res = row.map(Number)
+              rows.push date.concat res[3..6], res[11..11]
 
           GetData.csv2json (cnt), {delim: ',', textdelim:'\r', headers: headers.split(';')}
 
