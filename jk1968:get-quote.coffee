@@ -31,7 +31,8 @@ if Meteor.isClient
               row = r.split ','
               date = [(new Date row[0]).getTime()]
               res = row.map(Number)
-              rows.push date.concat res[3..6], res[11..11]
+              unless (res[3] is 0) or (res[4] is 0) or (res[5] is 0) or res[6] is 0
+                rows.push date.concat res[3..6], res[11..11]
 
           GetData.csv2json (cnt), {delim: ',', textdelim:'\r', headers: headers.split(';')}
 
