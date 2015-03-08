@@ -15,6 +15,7 @@ http://www.spasvo.com/news/html/2015120133414.html
 
 　　根据网页的特征，可以用R语言自动化的分析网页内容，获得上市日数据，代码如下，
 
+# jk註: 新地址 http://quotes.money.163.com/f10/gszl_600000.html
 #下载股票上市日期
 #download the listingdate of one security
 library(RCurl)
