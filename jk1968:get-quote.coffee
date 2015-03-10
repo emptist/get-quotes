@@ -14,7 +14,7 @@ if Meteor.isClient
         _ntes_quote_callback = (args) -> args
         rawData url, (cnt)-> eval cnt
 
-      when '163.com'
+      when '163.com' # encoding in GBK
         host = 'http://quotes.money.163.com/service/chddata.html?code='
         # 日期，代碼，名稱，收盤，最高，最低，開盤，前收，漲跌，幅度，換手率，成交量，成交金額，總市值，流通市值
         fields = 'TOPEN;HIGH;LOW;TCLOSE;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
